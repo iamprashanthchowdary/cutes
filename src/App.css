@@ -1,0 +1,647 @@
+.app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 2rem);
+  overflow-x: clip;
+}
+
+/* First screen fills the viewport and centers its content vertically */
+.envelope-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+#root {
+  overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding-top: 1rem;
+}
+
+/* "MADE WITH SO MUCH LOVE" pill badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4em 1.1em;
+  border: 1px solid #f4b3c0;
+  border-radius: 999px;
+  background: #fdeef1;
+  color: #e46e8a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.badge-heart {
+  width: 14px;
+  height: 14px;
+}
+
+/* Big serif title with sparkles */
+.hero-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.25rem 0 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  line-height: 1.1;
+  color: #2b2b2b;
+}
+
+.sparkle {
+  color: #ef7d9c;
+  font-size: 0.5em;
+}
+
+/* Cursive subtitle with outline heart */
+.hero-subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-family: 'Brush Script MT', 'Segoe Script', cursive;
+  font-style: italic;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  color: #ef5f8a;
+}
+
+.subtitle-heart {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+/* Divider with small heart */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: min(340px, 80%);
+  margin-top: 0.5rem;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e9a6b3, transparent);
+}
+
+.divider-heart {
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== Envelope stage ===== */
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1.5rem 1rem 0;
+  /* 3D scene */
+  perspective: 1200px;
+  perspective-origin: 50% 40%;
+}
+
+.envelope {
+  position: relative;
+  width: min(420px, 82vw);
+  aspect-ratio: 1402 / 1122;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-top: 1rem;
+  transform-style: preserve-3d;
+  transform: rotateX(16deg) rotateZ(-1deg);
+  transition: transform 0.5s ease;
+}
+
+.envelope:hover {
+  transform: rotateX(12deg) rotateZ(-1deg) translateY(-6px);
+}
+
+.envelope.is-open {
+  transform: rotateX(8deg) scale(0.96);
+}
+
+/* Envelope PNGs, stacked and cross-faded */
+.env-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  filter: drop-shadow(0 22px 30px rgba(210, 120, 145, 0.35));
+  transition: opacity 0.5s ease;
+  backface-visibility: hidden;
+}
+
+.env-closed {
+  opacity: 1;
+  z-index: 6;
+}
+
+.env-open {
+  opacity: 0;
+  z-index: 6;
+}
+
+.envelope.is-open .env-closed {
+  opacity: 0;
+}
+
+.envelope.is-open .env-open {
+  opacity: 1;
+}
+
+/* ===== Full-screen burst that forms a glowing heart ===== */
+.burst {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  pointer-events: none;
+  perspective: 1400px;
+  overflow: hidden;
+  /* enforce the clip even for 3D-transformed children so particles that
+     travel toward the edge never create page scroll */
+  contain: layout paint size;
+}
+
+/* soft radial glow behind the heart, fades in with the shape */
+.heart-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 62vmin;
+  height: 62vmin;
+  transform: translate(-50%, -50%) scale(0.4);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(247, 150, 172, 0.4) 0%,
+    rgba(247, 160, 178, 0.16) 42%,
+    rgba(247, 160, 178, 0) 70%
+  );
+  opacity: 0;
+  transition: opacity 1.2s ease 0.6s, transform 1.6s ease 0.6s;
+}
+
+.burst.is-open .heart-glow {
+  transform: translate(-50%, -50%) scale(1);
+  /* glow blooms with the heart, then fades away as the flowers fall */
+  animation: glowBloom 6s ease-in-out 0.6s forwards;
+}
+
+@keyframes glowBloom {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  55% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/*
+ * Each particle: blast out from the envelope, spread into a wide heart, then
+ * let go and drift slowly down to the bottom of the screen (falling petals).
+ * Depth (size + opacity) is baked in from JS for a layered, 3D look.
+ */
+.particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--size);
+  height: var(--size);
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  opacity: 0;
+  transform: translate3d(0, 0, 0) scale(0.1);
+  will-change: transform, opacity;
+}
+
+.particle-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 6px rgba(196, 120, 145, 0.35));
+}
+
+/* Assemble: quick blast, spread into a wider heart, then run the slow fall. */
+.burst.is-open .particle {
+  animation: particleAssemble 3s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    particleFall var(--fall-dur) cubic-bezier(0.45, 0, 0.55, 1) forwards;
+  /* the fall kicks in after the heart has formed and held for a beat */
+  animation-delay: var(--delay), calc(var(--delay) + 3s + var(--fall-delay));
+}
+
+@keyframes particleAssemble {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.1) rotate(0deg);
+  }
+  10% {
+    opacity: var(--opacity);
+  }
+  /* fast blast to a partway point */
+  32% {
+    opacity: var(--opacity);
+    transform: translate3d(var(--blast-x), var(--blast-y), var(--z)) scale(1.05)
+      rotate(calc(var(--rot) * 0.6));
+  }
+  /* spread out into a wider heart with a slight overshoot for life */
+  80% {
+    transform: translate3d(
+        calc(var(--spread-x) * 1.02),
+        calc(var(--spread-y) * 1.02),
+        calc(var(--z) * 0.4)
+      )
+      scale(1) rotate(var(--rot));
+  }
+  100% {
+    opacity: var(--opacity);
+    transform: translate3d(var(--spread-x), var(--spread-y), calc(var(--z) * 0.4))
+      scale(1) rotate(var(--rot));
+  }
+}
+
+/* After the heart forms, the flowers let go and drift slowly to the bottom,
+   swaying sideways and tumbling gently, fading as they reach the floor. */
+@keyframes particleFall {
+  0% {
+    opacity: var(--opacity);
+    transform: translate3d(var(--spread-x), var(--spread-y), calc(var(--z) * 0.4))
+      scale(1) rotate(var(--rot));
+  }
+  15% {
+    opacity: var(--opacity);
+  }
+  85% {
+    opacity: var(--opacity);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--fall-x), var(--fall-y), 0) scale(0.9)
+      rotate(calc(var(--rot) + var(--fall-rot)));
+  }
+}
+
+.burst:not(.is-open) .particle {
+  animation: none;
+}
+
+/* On small screens the heart is sized in vmin (off the narrow width) yet
+   centered on the tall viewport, so it floats small and disconnected in the
+   upper space. Scale it up a touch and nudge it down so the blast reads as a
+   full, centered heart that emanates from around the envelope. */
+@media (max-width: 640px) {
+  .burst {
+    transform: scale(0.85) translateY(6%);
+    transform-origin: center center;
+  }
+  .heart-glow {
+    width: 70vmin;
+    height: 70vmin;
+  }
+
+  /* compact the first (envelope) screen so it fits without scrolling */
+  .stage {
+    min-height: auto;
+    padding: 1.5rem 1rem 1rem;
+    gap: 1rem;
+  }
+
+  .hero {
+    padding-top: 0.25rem;
+    gap: 0.5rem;
+  }
+
+  .envelope {
+    margin-top: 0.5rem;
+    width: min(360px, 80vw);
+  }
+}
+
+.hint {
+  margin: 0;
+  color: #d98ba0;
+  font-size: 0.85rem;
+  font-style: italic;
+  letter-spacing: 0.03em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst.is-open .particle,
+  .burst.is-open .heart-glow {
+    animation-duration: 0.001s;
+    animation-iteration-count: 1;
+  }
+}
+
+/* ===== "Next" button on the envelope screen ===== */
+.next-btn {
+  margin-top: 0.5rem;
+  padding: 0.75em 2.2em;
+  border-radius: 999px;
+  border: none;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background-color: #ef7d9c;
+  box-shadow: 0 8px 18px rgba(239, 125, 156, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  animation: sorryPop 0.5s ease both;
+}
+
+.next-btn:hover {
+  transform: translateY(-2px);
+  background-color: #ea6a8d;
+}
+
+/* ===== Sorry screen ===== */
+.sorry-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.sorry-img {
+  width: min(680px, 90vw);
+  height: auto;
+  filter: drop-shadow(0 18px 30px rgba(210, 120, 145, 0.3));
+  user-select: none;
+  animation: sorryPop 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes sorryPop {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Two horizontal buttons */
+.choice-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  animation: sorryPop 1s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+}
+
+.choice-btn {
+  min-width: 150px;
+  padding: 0.8em 1.8em;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.choice-btn:hover {
+  transform: translateY(-2px);
+}
+
+.choice-btn.accept {
+  background-color: #ef7d9c;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(239, 125, 156, 0.4);
+}
+
+.choice-btn.accept:hover {
+  background-color: #ea6a8d;
+}
+
+.choice-btn.reject {
+  background-color: #fff;
+  color: #e0708a;
+  border-color: #f4b3c0;
+  box-shadow: 0 8px 18px rgba(239, 125, 156, 0.2);
+}
+
+.choice-btn.reject:hover {
+  background-color: #fdeef1;
+}
+
+.choice-btn.forgive {
+  background-color: #f7c1ce;
+  color: #a8465f;
+  box-shadow: 0 8px 18px rgba(239, 125, 156, 0.3);
+}
+
+.choice-btn.forgive:hover {
+  background-color: #f4b0c1;
+}
+
+.choice-result {
+  margin: 0;
+  font-family: 'Brush Script MT', 'Segoe Script', cursive;
+  font-style: italic;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  color: #ef5f8a;
+  animation: sorryPop 0.6s ease both;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+/* ===== Mobile tweaks for choices and screens ===== */
+@media (max-width: 640px) {
+  .sorry-screen,
+  .kiss-screen {
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .choice-row {
+    width: 100%;
+    max-width: 340px;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .choice-btn {
+    width: 100%;
+    min-width: 0;
+    padding: 0.9em 1.4em;
+  }
+
+  .next-btn {
+    width: 100%;
+    max-width: 340px;
+    padding: 0.9em 1.4em;
+  }
+}
+
+/* ===== Kiss screen (shown on "Rejected") ===== */
+.kiss-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+  /* the whole screen eases in slowly */
+  animation: screenFadeIn 1.8s ease both;
+}
+
+.kiss-img {
+  width: min(720px, 92vw);
+  height: auto;
+  filter: drop-shadow(0 18px 30px rgba(210, 120, 145, 0.3));
+  user-select: none;
+  /* slow, gentle fade + zoom, held slightly after the screen starts */
+  animation: kissReveal 2.6s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+
+@keyframes screenFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes kissReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+    filter: drop-shadow(0 18px 30px rgba(210, 120, 145, 0.3)) blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: drop-shadow(0 18px 30px rgba(210, 120, 145, 0.3)) blur(0);
+  }
+}
+
+/* ===== Reading screen (shown on "Accepted") ===== */
+.reading-screen {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem 1rem 3rem;
+  animation: screenFadeIn 1.4s ease both;
+}
+
+/* Big, readable letter */
+.reading-letter-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.reading-letter {
+  width: auto;
+  height: min(70vh, 820px);
+  max-width: 90vw;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 30px rgba(210, 120, 145, 0.3));
+  user-select: none;
+  animation: kissReveal 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+/* Girl reading, pinned to the bottom-left corner */
+.reading-girl {
+  position: fixed;
+  left: 1rem;
+  bottom: 0;
+  width: min(360px, 32vw);
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 18px rgba(210, 120, 145, 0.28));
+  animation: sorryPop 1s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+  z-index: 2;
+}
+
+.reading-next {
+  position: relative;
+  z-index: 3;
+}
+
+/*
+ * On phones keep the same layout as desktop: letter centered with the girl
+ * pinned to the bottom-left corner. Just shrink the girl (reading.png) so she
+ * doesn't crowd the letter, and give the letter a little bottom room.
+ */
+@media (max-width: 640px) {
+  .reading-screen {
+    gap: 1rem;
+    padding: 1.5rem 0.75rem 2rem;
+  }
+
+  .reading-letter {
+    height: auto;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .reading-girl {
+    width: min(150px, 42vw);
+    left: 0.5rem;
+  }
+
+  /* Keep the Next button as a compact pill (don't let it stretch full-width
+     and overlap the girl). Center it and lift it clear of her. */
+  .reading-next {
+    width: auto;
+    max-width: none;
+    align-self: center;
+    margin-left: auto;
+    padding: 0.8em 2.4em;
+  }
+}

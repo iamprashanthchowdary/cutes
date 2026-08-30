@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 1024" preserveAspectRatio="xMidYMid slice">
+  <!-- Base cream/peach fill -->
+  <rect width="768" height="1024" fill="#fbe0d6" />
+
+  <!-- Deep rose layer (bottom-left large wave) -->
+  <path fill="#f2a9ab" d="M0 300
+    C 40 340, 70 400, 55 460
+    C 40 520, 95 560, 120 610
+    C 150 665, 120 720, 90 770
+    C 55 825, 100 880, 130 930
+    C 160 975, 120 1005, 90 1024
+    L 0 1024 Z" />
+
+  <!-- Mid rose layer (right-bottom wave) -->
+  <path fill="#f4b3b3" d="M768 500
+    C 700 520, 660 570, 665 630
+    C 670 690, 620 720, 590 770
+    C 555 830, 600 890, 640 940
+    C 675 985, 720 1005, 768 1015
+    L 768 500 Z" />
+
+  <!-- Soft lighter rose accent between layers (left) -->
+  <path fill="#f6c2bd" opacity="0.6" d="M0 330
+    C 55 380, 85 440, 65 500
+    C 45 560, 100 600, 120 660
+    C 140 720, 95 780, 70 840
+    C 45 900, 90 960, 60 1024
+    L 0 1024 Z" />
+
+  <!-- Top soft glow to keep the center pale and warm -->
+  <radialGradient id="glow" cx="45%" cy="30%" r="80%">
+    <stop offset="0%" stop-color="#fdeae2" />
+    <stop offset="60%" stop-color="#fbe0d6" stop-opacity="0.2" />
+    <stop offset="100%" stop-color="#fbe0d6" stop-opacity="0" />
+  </radialGradient>
+  <rect width="768" height="1024" fill="url(#glow)" />
+</svg>
