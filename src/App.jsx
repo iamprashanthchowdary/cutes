@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import heart from './assets/heart.svg'
 import loveSymbol from './assets/love-symbol.svg'
@@ -17,6 +17,26 @@ import readingImg from './assets/reading.png'
 import hugImg from './assets/hug.png'
 
 const decorSprites = [pearl, pinkFlower, sparkle, tinyFlower, whiteDaisy]
+
+// Every image the app uses. We preload all of these before revealing the UI
+// so nothing pops in slowly once the user starts interacting.
+const allImages = [
+  heart,
+  loveSymbol,
+  pearl,
+  pinkFlower,
+  sparkle,
+  tinyFlower,
+  whiteDaisy,
+  envelopeClosed,
+  envelopeOpen,
+  sorryImg,
+  kissImg,
+  moreKissImg,
+  letterImg,
+  readingImg,
+  hugImg,
+]
 
 // Heart parametric curve (classic). t in [0, 2π].
 //   x = 16 sin^3(t)
@@ -116,6 +136,52 @@ function App() {
   const [open, setOpen] = useState(false)
   const [screen, setScreen] = useState('envelope') // 'envelope' | 'sorry' | 'kiss' | 'more-kiss' | 'reading' | 'hug'
   const particles = useMemo(() => buildParticles(70, 90), [])
+
+  // ---- Preload all images before showing the app ----
+  const [loaded, setLoaded] = useState(0)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    let done = 0
+
+    const markOne = () => {
+      if (cancelled) return
+      done += 1
+      setLoaded(done)
+      if (done >= allImages.length) {
+        // brief hold so the 100% state is visible, then reveal
+        setTimeout(() => !cancelled && setReady(true), 350)
+      }
+    }
+
+    allImages.forEach((src) => {
+      const img = new Image()
+      img.onload = markOne
+      img.onerror = markOne // don't get stuck if one asset fails
+      img.src = src
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (!ready) {
+    const pct = Math.round((loaded / allImages.length) * 100)
+    return (
+      <div className="app loader-screen">
+        <div className="loader-card">
+          <img src={heart} alt="" className="loader-heart" />
+          <p className="loader-title">getting something sweet ready…</p>
+          <div className="loader-bar">
+            <span className="loader-fill" style={{ width: `${pct}%` }} />
+          </div>
+          <p className="loader-pct">{pct}%</p>
+        </div>
+      </div>
+    )
+  }
 
   // Final screen: a warm hug
   if (screen === 'hug') {

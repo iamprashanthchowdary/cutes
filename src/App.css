@@ -5,6 +5,72 @@
   overflow-x: clip;
 }
 
+/* ===== Loading screen (preloads all images before the app shows) ===== */
+.loader-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loader-heart {
+  width: 56px;
+  height: 56px;
+  animation: loaderBeat 1s ease-in-out infinite;
+}
+
+@keyframes loaderBeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+.loader-title {
+  margin: 0;
+  font-family: 'Brush Script MT', 'Segoe Script', cursive;
+  font-style: italic;
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  color: #ef5f8a;
+}
+
+.loader-bar {
+  width: min(260px, 70vw);
+  height: 8px;
+  border-radius: 999px;
+  background: #fbdfe6;
+  overflow: hidden;
+}
+
+.loader-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(to right, #f7a1b6, #ef5f8a);
+  transition: width 0.3s ease;
+}
+
+.loader-pct {
+  margin: 0;
+  color: #d98ba0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
 /* First screen fills the viewport and centers its content vertically */
 .envelope-screen {
   min-height: 100vh;
