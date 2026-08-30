@@ -138,42 +138,84 @@ function App() {
   const particles = useMemo(() => buildParticles(70, 90), [])
 
   // ---- Preload all images before showing the app ----
-  const [loaded, setLoaded] = useState(0)
+  const [imagesDone, setImagesDone] = useState(false)
+  const [progress, setProgress] = useState(0) // 0..100, eased for a slow reveal
   const [ready, setReady] = useState(false)
+  const [flirtIndex, setFlirtIndex] = useState(0)
 
+  // Cute flirty lines that rotate while the page loads
+  const flirtLines = useMemo(
+    () => [
+      'hey cutie… almost there 😉',
+      'making you smile takes a sec 💕',
+      'good things come to those who wait 😘',
+      'butterflies loading… 🦋',
+      'you look lovely today, you know 😍',
+      'worth the wait, promise 💖',
+      'stealing a little of your heart… ❤️',
+    ],
+    [],
+  )
+
+  // Preload every image; flip a flag when they're all done (or errored)
   useEffect(() => {
     let cancelled = false
     let done = 0
-
     const markOne = () => {
       if (cancelled) return
       done += 1
-      setLoaded(done)
-      if (done >= allImages.length) {
-        // brief hold so the 100% state is visible, then reveal
-        setTimeout(() => !cancelled && setReady(true), 350)
-      }
+      if (done >= allImages.length) setImagesDone(true)
     }
-
     allImages.forEach((src) => {
       const img = new Image()
       img.onload = markOne
       img.onerror = markOne // don't get stuck if one asset fails
       img.src = src
     })
-
     return () => {
       cancelled = true
     }
   }, [])
 
+  // Rotate the flirty message every 2s while loading
+  useEffect(() => {
+    if (ready) return
+    const id = setInterval(() => {
+      setFlirtIndex((i) => (i + 1) % flirtLines.length)
+    }, 2000)
+    return () => clearInterval(id)
+  }, [ready, flirtLines.length])
+
+  // Fill the progress bar over a fixed 5-second timeline (based on real
+  // elapsed time) so the loading screen always lasts ~5s and the flirty lines
+  // have time to shine, regardless of how fast the images actually load.
+  useEffect(() => {
+    if (ready) return
+    const LOAD_MS = 5000
+    const start = performance.now()
+    const id = setInterval(() => {
+      const pct = Math.min(100, ((performance.now() - start) / LOAD_MS) * 100)
+      setProgress(pct)
+      if (pct >= 100) clearInterval(id)
+    }, 50)
+    return () => clearInterval(id)
+  }, [ready])
+
+  // When the 5s bar is full, reveal the app (only after images finished too,
+  // so nothing pops in; images almost always beat the 5s timer anyway).
+  useEffect(() => {
+    if (progress >= 100 && imagesDone && !ready) setReady(true)
+  }, [progress, imagesDone, ready])
+
   if (!ready) {
-    const pct = Math.round((loaded / allImages.length) * 100)
+    const pct = Math.round(progress)
     return (
       <div className="app loader-screen">
         <div className="loader-card">
+          <p key={flirtIndex} className="loader-flirt">
+            {flirtLines[flirtIndex]}
+          </p>
           <img src={heart} alt="" className="loader-heart" />
-          <p className="loader-title">getting something sweet ready…</p>
           <div className="loader-bar">
             <span className="loader-fill" style={{ width: `${pct}%` }} />
           </div>
